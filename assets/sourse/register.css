@@ -1,0 +1,124 @@
+.tiplight{
+    position: absolute;
+    right: 26px;
+    top: 1px;
+    width: 8px;
+    height: 39px;
+    background: #9ddd54;
+    color: white;
+    border-radius: 0 5px 5px 0;
+    display: none;
+}
+div.rinput{
+    position: relative;
+    height: 43px;
+    margin: 0;
+    margin-top:10px;
+    overflow: hidden;
+
+}
+.rinput input{
+    border: 1px solid #dcdfe6;
+    border-radius: 5px;
+    width: 88%;
+    height: 41px;
+    display: block;
+    font-size: 18px;
+    padding-left: 10px;
+    color: #9E9E9E;
+}
+#getpi{
+    position: absolute;
+    right: 27px;
+    top: 2px;
+    width: 101px;
+    height: 36px;
+    border: solid 1px #2196F3;
+    border-radius: 4px;
+    color: white;
+    background-color: #03a9f4;
+    cursor: pointer;
+}
+#agree{
+    width: 14px;
+    float: left;
+    position: relative;
+    left: 27px;
+}
+#register-submit,#login-submit{
+    display: block;
+    border: solid 1px;
+    background-color: #03a9f4;
+    color: white;
+    text-align: center;
+    width: 89%;
+    margin: auto;
+    height: 41px;
+    border-radius: 5px;
+    line-height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    transition:all 0.2s;
+    -moz-transition:all 0.2s; /* Firefox 4 */
+    -webkit-transition:all 0.2s; /* Safari and Chrome */
+    -o-transition:all 0.2s; /* Opera */
+}
+#register-submit:hover{
+    box-shadow: 0 0 4px 5px #108dff24;
+}
+#register-submit[disabled]{
+    background-color: #c5c2c2;
+}
+#getpi[disabled]{
+    background-color: #c5c2c2;
+    border: solid 1px #bab7b7;
+}
+.tab{
+
+    font-size: 20px;
+    color: #ffffff;
+    line-height: 70px;
+    text-align: center;
+    display: block;
+    float: left;
+    background-color: #22acec;
+    width: 50%;
+    height: 100%;
+    transition:all 0.2s;
+    -moz-transition:all 0.2s; /* Firefox 4 */
+    -webkit-transition:all 0.2s; /* Safari and Chrome */
+    -o-transition:all 0.2s; /* Opera */
+}
+.tab:hover{
+    background-color: #30b2ef;
+    border-bottom: solid 6px #75caf3;
+    font-size: 22px;
+}
+.tab-now{
+
+    font-size: 24px;
+    color: white;
+    line-height: 70px;
+    text-align: center;
+    display: block;
+    float: left;
+    background-color: #3cb7f1;
+    width: 50%;
+    height: 100%;
+    border-bottom: solid 6px #75caf3;
+
+
+}
+.tip{
+    display: none;
+    background-color: #e4574c;
+    width: 80%;
+    opacity: 1;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    color: white;
+    border-radius: 4px;
+    position: absolute;
+    margin: -34px 52px;
+}

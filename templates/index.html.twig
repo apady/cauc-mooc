@@ -1,0 +1,66 @@
+{% extends 'layout.html.twig' %}
+{% block title %}首页 - 航大云课 {% endblock %}
+{% block stylesheets %}
+    <style>
+        #indexCategorys .tags{
+            position: relative;
+            left: 50%;
+            margin-left: -591px;
+        }
+        #indexCategorys{
+            margin-top: 21px;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+
+<!-- 焦点图 -->
+    <div id="recentFile">
+    <p id="zuijin">最近文件</p>
+    <div id="recentFileList">
+        <div class="file"><img class="fileicon" src="{{ asset('img/fileicon/excel.svg') }}"><p>haha.excel</p> </div>
+        <div class="file"><img class="fileicon" src="{{ asset('img/fileicon/excel.svg') }}"><p>haha.excel</p> </div>
+        <div class="file"><img class="fileicon" src="{{ asset('img/fileicon/excel.svg') }}"><p>haha.excel</p> </div>
+    </div>
+</div>
+    <img src="{{ asset('img/focus/1.png') }}" style="display:block;background-color: black;width: 1170px;height:auto;position:relative;margin:0 auto;top:15px;box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.39); ">
+
+    <!--课程列表-->
+    <div id="indexCategorys" style="float: left;margin-left: 0px;margin-bottom: 0px;"></div>
+<div id="wrapper-container">
+		<div class="container object">
+			<div id="main-container-image">
+					<section class="work">
+                        {% for course in courseList %}
+                            <figure class="totag-{{ course.cateid }} white">
+                                <a href="{{ path('oneCourseInfo',{'id':course.id}) }}">
+                                    <img src="{{ asset(course.getCoverImg().getPath() )}}" alt="" />
+                                    <dl>
+                                        <dt>{{ course.name }}</dt>
+                                        <dd>{{ course.info }}</dd>
+                                    </dl>
+                                </a>
+                                <div id="wrapper-part-info">
+                                    <div class="part-info-image"><img src="{{asset('img/icon-psd.svg')}}" alt="" width="28" height="28"/></div>
+                                    <div id="part-info">{{ course.name }}</div>
+                                </div>
+                            </figure>
+                        {% endfor %}
+					</section>
+            </div>
+        </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script>
+    var isShare={{ isShare }};
+    var encode_string="{{ encode_string }}";
+    if(isShare){
+        modalFrame("请输入文件提取码","small",formInput("shareKey","提取码","请输入提取码","")+
+        formButton("确定","submitShareKey()"))
+    }
+
+
+</script>
+{% endblock %}

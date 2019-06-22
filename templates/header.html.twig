@@ -1,0 +1,74 @@
+{% set hover=NULL %}
+
+<div id="wrapper-header">
+    <div id="main-header" class="object">
+        <div class="logo">
+            <a href="{{ path('courseList') }}"><h1 id="cloud">航大云课</h1></a>
+        </div>
+        <div id="wrapper-title-4">
+            {% if app.user==null %}
+            <a href="{{ path('login') }}"><div class="oldies object" style="margin: 0 auto;margin-top: 10px;margin-left: 15px;margin-right: 20px;font-size: 17px;">登录</div></a>
+            {% else %}
+                <a href="#" id="mine" onclick="if (document.getElementById('mylist').style.display == 'block')
+        document.getElementById('mylist').style.display = 'none';
+    else
+        document.getElementById('mylist').style.display = 'block';return false;">
+                    <div class="oldies object" style="margin: 0 auto;margin-top: 10px;margin-left: 15px;margin-right: 20px;font-size: 17px;">{{ app.user.username}}</div>
+
+                    <div id="mylist">
+                        <ul>
+                            <li><a href="{{ path('userInfo') }}">个人信息</a></li>
+                            {#额#}
+                            {% if is_granted('ROLE_TEACHER') %}
+                                <li><a href="{{ path('courseAdded') }}">我的课程</a></li>
+                            {% else %}
+                                <li><a href="{{ path('courseJoined') }}">我的课程</a></li>
+                            {% endif %}
+
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li><a href="">学生管理</a></li>
+                                <li><a href="{{ path('adminhome') }}">管理员后台</a></li>
+                            {% endif %}
+
+                            <li><a href="{{ path('logout') }}">注销</a></li>
+                        </ul>
+
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+        <div id="main_tip_search">
+            <form>
+                <input type="text" name="search" id="tip_search_input" list="search" autocomplete=off required>
+            </form>
+        </div>
+        <div id="stripes"></div>
+    </div>
+</div>
+
+<div id="wrapper-navbar" >
+
+<div class="navbar object">
+
+    <div id="wrapper-sorting">
+        <div id="wrapper-title-1">
+            <div class="top-rated object {% if hover=='course' %}hover{% endif %}" >课程</div>
+            <div id="fleche-nav-1"></div>
+        </div>
+
+        <div id="wrapper-title-2">
+            <a href="#"><div class="recent object {% if hover=='task' %}hover{% endif %}" >作业</div></a>
+            <div id="fleche-nav-2"></div>
+        </div>
+
+        <div id="wrapper-title-3">
+            <a href="#"><div class="oldies object {% if hover=='ziyuan' %}hover{% endif %}" >资源</div></a>
+            <div id="fleche-nav-3"></div>
+        </div>
+
+    </div>
+</div>
+
+</div>
+</div>
+

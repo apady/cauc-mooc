@@ -1,0 +1,101 @@
+
+{% extends 'layout.html.twig' %}
+{% block title %}已添加课程 - 航大云课{% endblock %}
+{% block stylesheets %}<link href='{{asset('task.css')}}' rel='stylesheet' type='text/css'>{% endblock %}
+{% block body %}
+<div id="task">
+    <div id="task-title">
+        <h1>欢迎回来,{{ app.user.username}}</h1>
+    </div>
+{#额#}
+    <div id="task-all">
+        <div id="task-left-block">
+        <ul>
+            <li><a id="list1" href="{{ path('userInfo') }}">个人信息</a></li>
+            {% if is_granted('ROLE_TEACHER') %}
+                <li style=""><a id="list2" href="{{ path('courseAdded') }}">已添加课程</a></li>
+                <li><a id="list4" href="#">学生管理</a></li>
+            {% endif %}
+            <li><a id="list3" href="{{ path('courseJoined') }}">已加入课程</a></li>
+
+            {% if is_granted('ROLE_ADMIN') %}
+                <li><a id="list5" href="{{ path('adminhome') }}">管理员后台</a></li>
+            {% endif %}
+
+        </ul>
+        </div>
+
+        <div id="task-content">
+        {% block content %}{% endblock%}
+        </div>
+    </div>
+
+</div>
+    <script>
+        //修改课程
+        function submitEdit(id){
+            let courseName=$("#courseName").val();
+            let courseTime=$("#courseTime").val();
+            let courseInfo=$("#courseInfo").val();
+            let courseNum=$("#courseNum").val();
+            let courseCate=$("#courseCate").find("option:selected").text();
+            let courseId=id;
+            $.ajax({                                 //AJAX
+                type:"post",
+                url:"{{ path('courseEditUpdate',{'id':"999"}) }}".replace("999",id),                      //请求URL,对应后台Controller中的路由
+                data:{"name":courseName,"courseHours":courseTime,"info":courseInfo,"category":courseCate,"num":courseNum},//往后台提交的数据项
+                success:function(data){
+                    if(data.status==200)
+                        messageOk("修改成功");
+                    closeFrame();
+                    window.location.reload();
+                },
+                dataType:"json"
+            })
+        }
+        function courseDelete(id) {
+            closeFrame();
+            modalFrame("确定删除该课程?"+"<br>"+"<strong>注意:该操作将删除课程下的全部内容。</strong>","150px",formButtonConfirm(5,"确定","submitDelete("+id+")"));
+        }
+
+        function submitDelete(id) {
+            $.ajax({                                 //AJAX
+                type:"get",
+                url:"{{ path('courseEditDelete',{'id':"999"}) }}".replace("999",id),
+                success:function (data) {
+                    if(data.status==200){
+                        window.location.replace("{{ path('courseAdded') }}");
+
+                    }
+
+                }
+
+            })
+        }
+        function editCourse(id,name,info,time,num,cate) {
+            $.ajax({                                 //AJAX
+                type:"get",
+                url:"{{ path('categoryGet') }}",                      //请求URL,对应后台Controller中的路由
+
+                success:function(data){                    //后台返回响应结果时会自动执行该回调函数
+//data.id,data.courseName,data.courseInfo,data.courseNum,data.courseTime,data.courseCate
+
+                    modalFrame("修改课程信息","500px",
+                        formInput("courseName","课程名称","请输入课程名",name)+
+                        formTextArea("courseInfo","简介","请输入课程简介",info)+
+                        formNumber("courseTime","时长(课时)","请输入课程时长",time)+
+                        formNumber("courseNum","容量(人)","请输入人数",num)+
+                        formSelect("courseCate","分类",data,cate)+
+                        formButton2("保存","submitEdit("+id+")","删除","courseDelete("+id+")")
+                    )
+
+                },
+                error:function(data){
+                    alert("服务器添加失败")
+                },
+                dataType:"json"
+            })
+
+        }
+    </script>
+{% endblock %}

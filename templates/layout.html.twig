@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}航大云课 {% endblock %}</title>
+    {% block stylesheets %}{% endblock %}
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="icon" type="image/png" href="{{ asset('img/small-logo-01.png') }}">
+    {{ encore_entry_link_tags('layout') }}
+    {#<link href="{{asset('style.css')}}" rel='stylesheet' type='text/css'>#}
+</head>
+<body>
+{#<a name="ancre"></a>#}
+<!-- CACHE -->
+{#<div class="cache" style="opacity:0;"></div>#}
+{{ include('header.html.twig') }}
+{% block body %}{% endblock %}
+{{ include('footer.html.twig') }}
+{% block global_js %}
+    <script type="text/javascript" src="{{ asset('js/jquery-1.10.2.js') }}"></script>
+
+        <script type="text/javascript" src="{{ asset('js/jquery.scrollTo.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('js/jquery.localScroll.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('js/jquery-animate-css-rotate-scale.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('js/fastclick.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('js/jquery.animate-colors-min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('js/jquery.animate-shadow-min.js') }}"></script>
+    {#<script type="text/javascript" src="{{ asset('js/main.js') }}"></script>#}
+    {{ encore_entry_script_tags('layout') }}
+    {{ encore_entry_script_tags('register') }}
+    <script>
+        //模态框
+        function modalFrame(title,height,content) {
+            if(height=="small") height="210px";
+            $("body").append("<div id=\"frameback\" onclick=\"closeFrame()\"></div>\n" +
+                "        <div id=\"superframe\"></div>")
+            var title="<p>"+title+"</p>\n";
+            var closeicon="<a onclick='closeFrame()' id=\"frameCloseIcon\"><img src='/icon/close.svg'></a>"
+            $("#superframe").append(title+closeicon+content);
+            $("#superframe").css("display","block");
+            $("#superframe").css("height",height);
+            $("#frameback").css("display","block");
+        }
+
+        function formInput(id,label,placeholder,value){
+            return '<div id=\"formitem\">\n' +
+                '<label for=\"'+id+'\">'+label+':</label>                \n' +
+                "    <div>\n" +
+                '        <input id=\"'+id+'\" type=\"textbox\" value=\"'+value+'\" name=\"'+id+'\" placeholder=\"'+placeholder+'\">\n' +
+                "            </div>\n" +
+                "</div>";
+        }
+        function formNumber(id,label,placeholder,value){
+            return '<div id=\"formitem\">\n' +
+                '<label for=\"'+id+'\">'+label+':</label>                \n' +
+                "    <div>\n" +
+                '        <input id=\"'+id+'\" type=\"number\" value=\"'+value+'\" name=\"'+id+'\" placeholder=\"'+placeholder+'\">\n' +
+                "            </div>\n" +
+                "</div>";
+        }
+        function formImgUploader(label,url,action,formdata){
+            //需提前准备webupload环境,url和formdata自行到js修改
+            return "            <div id=\"formitem\" style=\"height:92px\">\n" +
+                '<label>'+label+':</label>                \n' +
+                '                <div><button class=\"formBtn_blue\"onclick=\"'+'chooseImg()'+'\">'+'选择图片'+'</button>\n' +
+                "            " +
+                    '<img class=\"coverSmall\">'+
+                "</div></div>";
+        }
+        function chooseImg() {
+            $(".cancel").trigger("click");
+            $("#filePicker").children("div").eq(1).find("label").trigger("click");
+
+        }
+
+
+        function formTextArea(id,label,placeholder,value){
+            return '<div id=\"formitem\" style=\"height:92px\">\n' +
+                '<label for=\"'+id+'\">'+label+':</label>                \n' +
+                "    <div>\n" +
+                '        <textarea id=\"'+id+'\" type=\"textbox\" name=\"'+id+'\" placeholder=\"'+placeholder+'\">\n' +
+                value+"</textarea></div>\n" +
+                "</div>";
+        }
+        function formSelect(id,label,value,now,keyname="name"){
+            var options='';
+            if(now!=null)
+            {options="<option value=\"\" selected=\"selected\">"+now+"</option>";}
+            for (var i=0;i<value.length;i++) {
+                if(value[i][keyname]!=now){
+                var option="<option value=\"\">"+value[i][keyname]+"</option>";
+                options=options+option;}
+            }
+
+            return '<div id=\"formitem\" >\n' +
+                '<label for=\"'+id+'\">'+label+':</label>                \n' +
+                "    <div>\n" +
+                '        <select id=\"'+id+'\" required=\"required\" name=\"'+id+'\" >\n' +
+                options+"</select></div>\n" +
+                "</div>";
+        }
+        // <select id="course_category" name="teacher_add_course[category]" required="required">
+        //     <option value="" selected="selected">测试(当前）</option>
+        // <option value="" disabled="">————————</option>
+        // <option value="" selected="selected">测试</option>
+        //     </select>
+        function formButton(label,onclick){
+            //按钮包含一个蓝色按钮\一个白色的取消按钮,参数分别是绿色按钮对应的标签和动作名
+            return "            <div id=\"formitem\">\n" +
+                '<label>'+'</label>                \n' +
+                '                <div><button class=\"formBtn_blue\"onclick=\"'+onclick+'\">'+label+'</button>\n' +
+                '                <button class=\"formBtn_white\"onclick=\"'+"closeFrame()"+'\">'+"取消"+'</button>\n' +
+                "            </div></div>";
+
+        }
+        function formButton2(label,onclick,label2,onclick2){
+            //按钮包含一个蓝色按钮\一个红色按钮\一个白色的取消按钮,参数分别是绿色按钮和红色按钮对应的标签和动作名
+            return "            <div id=\"formitem\">\n" +
+                '<label>'+'</label>                \n' +
+                '                <div><button class=\"formBtn_blue\"onclick=\"'+onclick+'\">'+label+'</button>\n' +
+                '<button class=\"formBtn_red\"onclick=\"'+onclick2+'\">'+label2+'</button>\n'+
+                '                <button class=\"formBtn_white\"onclick=\"'+"closeFrame()"+'\">'+"取消"+'</button>\n' +
+                "            </div></div>";
+
+        }
+        function formButtonConfirm(time,label,onclick){
+            //按钮包含一个可倒计时蓝色按钮\一个白色的取消按钮,参数分别是倒计时的世界\绿色按钮对应的标签\动作名
+            //倒计时
+            var countdown=time;
+
+            var timeinterval=setInterval(function () {
+                var $confirmButton=$("#confirmButton");
+
+                if (countdown==0){
+                    $confirmButton.text(label);
+                    $confirmButton.attr("onclick",onclick);
+                    $confirmButton.attr("class","formBtn_blue");
+                    countdown = time;
+                    clearInterval(timeinterval);
+                }
+                else{
+                    $confirmButton.attr("class","formBtn_white");
+                    $confirmButton.attr("onclick","");
+                    $confirmButton.text(label+"(" + countdown + ")");
+                    countdown--;
+                }
+
+            },1000)
+
+            return "            <div id=\"formitem\">\n" +
+                '<label>'+'</label>                \n' +
+                '                <div><button id=\"confirmButton\" class=\"formBtn_white\"onclick=\"'+onclick+'\">'+label+'('+time+')</button>\n' +
+                '                <button class=\"formBtn_white\"onclick=\"'+"closeFrame()"+'\">'+"取消"+'</button>\n' +
+                "            </div></div>";
+
+        }
+
+        function closeFrame() {
+            $("#superframe").remove();
+            $("#frameback").remove();
+        }
+            
+        //通知框
+        function messageOk(data,action=null) {
+
+            $("body").append('<div class=\"messageOk\">'+data+'<div>');
+            $(".messageOk").animate({height:"33px"},1000);
+            setTimeout(function () {
+                $(".messageOk").animate({opacity:"0"},2000);
+            },3500);
+            setTimeout(function () {
+                $(".messageOk").remove();
+            },5500);
+            eval(action);
+        }
+        function messageAlert(data,action=null) {
+
+            $("body").append('<div style=\"background-color:#f44336;\" class=\"messageOk\">'+data+'<div>');
+            $(".messageOk").animate({height:"33px"},1000);
+            setTimeout(function () {
+                $(".messageOk").animate({opacity:"0"},2000);
+            },3500);
+            setTimeout(function () {
+                $(".messageOk").remove();
+            },5500);
+            eval(action);
+        }
+        //分类栏
+        function deleteTag(id,isNeedConfirm=false){
+            if(isNeedConfirm==false){
+            modalFrame("确定删除该分类?","150px",formButton("确定","deleteTagSubmit("+id+")"));
+            }
+            if(isNeedConfirm==true){
+                modalFrame("确定删除该分类?"+"<br>"+"<strong>注意:该操作将删除分类下的全部内容。</strong>","150px",formButtonConfirm(5,"确定","deleteTagSubmit("+id+")"));
+            }
+        }
+        function deleteTagSubmit(id){
+
+            $.ajax({                                 //AJAX
+                type:"DELETE",
+                url:DeleteUrl,                    //请求URL,对应后台Controller中的路由
+                data:{"id":id},
+                success:function(data){                    //后台返回响应结果时会自动执行该回调函数
+                    if(data.success==true)
+                    {messageOk("删除成功");
+
+                    eval(ReflashAction);}
+                    else{
+                        alert(data.message);
+                    }
+
+                },
+                error:function(data){
+                    messageAlert(data.responseJSON.message);
+
+                },
+                dataType:"json"
+            })
+        }
+
+        function newTag(){
+            modalFrame("新增分类","small",formInput("newTag","分类名","请输入分类名","")
+                +formButton("添加","newTagSubmit()"));
+        }
+        function editTag() {
+            $("#editTag img").attr("src","{{ asset('icon/close.svg') }}");
+            $("#editTag img").attr("onclick","closeEditTag()");
+            $(".deleteTag").css("display","");
+            for(var i=1;i<$(".tags li").length-1;i++){
+
+                $(".tags li").eq(i).css("margin-right","27px");
+            }
+            $("#editTag").before("<li id=\"addTag\"><img onclick=\"newTag()\" class=\"editIcon\" src=\"{{ asset('img/plus.svg') }}\"></li>"+
+                "</ul></div>")
+        }
+        function closeEditTag() {
+            $("#editTag img").attr("src","{{ asset('img/setcategory.svg') }}");
+            $("#editTag img").attr("onclick","editTag()");
+            $(".deleteTag").css("display","none");
+            for(var i=1;i<$(".tags li").length-1;i++){
+                $(".tags li").eq(i).css("margin-right","0px");
+
+            }
+            $("#addTag").remove();
+        }
+        function newTagSubmit(){
+            var tagName=$("#newTag").val();
+            for(var i=0;i<tags.length;i++){
+                if(tagName==tags[i]){
+                    messageAlert("分类名已使用!请重新输入");
+                    return false;
+                }
+            }
+            $.ajax({                                 //AJAX
+                type:"post",
+                url:AddUrl,                    //请求URL,对应后台Controller中的路由
+                data:{"name":tagName},
+                success:function(data){                    //后台返回响应结果时会自动执行该回调函数
+                    messageOk("添加成功");
+                    eval(ReflashAction);
+
+                },
+                error:function(data){
+                    alert("服务器添加失败")
+                },
+                dataType:"json"
+            })
+        }
+
+        function newTags(data,ids,parent,addUrl,deleteUrl,reflashAction,isNeedDeleteConfirm=false){
+            DeleteUrl=deleteUrl;
+            AddUrl=addUrl;
+            ReflashAction=reflashAction;
+            focusTag=0;
+            //内容用class:totag+id来区分(从1开始数)
+            // data的类型是数组,parent是tags的父元素的id(这个父元素只能放tags)
+            var tagsNode="";
+            for(var i=0;i<data.length;i++){
+                tagsNode+="<li class=\"tag-"+ids[i]+'\" onclick=\"selectTag('+ids[i]+')\">'+data[i]+
+                    '<img style="display:none" onclick="deleteTag('+ids[i]+','+isNeedDeleteConfirm+')"  src="{{ asset("icon/delete.svg") }}" class="deleteTag">'+
+                    "</li>";
+            }
+
+            var tags="<div class=\"tags\">"+
+                "<ul>"+
+                '<li class="tag-0" onclick="selectTag('+'0'+')" style="background-color: #4bb9ea;">全部</li>'+
+                tagsNode+
+                "<li id=\"editTag\"><img onclick=\"editTag()\" class=\"editIcon\" src=\"{{ asset('img/setcategory.svg') }}\"></li>"+
+                "</ul></div>";
+
+            $("#"+parent).empty();
+            $("#"+parent).append(tags);
+
+
+
+        }
+        function selectTag(nowTag){
+            $(".tags").find(".tag-"+nowTag).css("background-color","#4bb9ea");
+            $(".tags").find(".tag-"+focusTag).css("background-color","#939c9c");
+            if(nowTag==0){$("*[class^='totag']").css("display","");focusTag=nowTag;return 0;};
+            focusTag=nowTag;
+
+            $("*[class^='totag']").css("display","none");
+            $(".totag-"+nowTag).css("display","");
+
+
+        }
+        //文件图标归类，通过扩展名返回类型名
+        function getFileIcon(kzm){
+            var imgname=null;
+
+            if(kzm=="pptx"||kzm=="ppt"||kzm=="pptm"||kzm=="ppsx"||kzm=="pots"||kzm=="potm"||kzm=="ppam"){imgname='file_ppt';}
+            else if(kzm=="xls"||kzm=="xlsx"||kzm=="xlsm"||kzm=="xltx"||kzm=="xltm"||kzm=="xlsb"||kzm=="xlam"){imgname='excel';}
+            else if(kzm=="docx"||kzm=="doc"||kzm=="docm"||kzm=="dotx"||kzm=="dotm"||kzm=="dot"){imgname='word';}
+            else if(kzm=="txt"){imgname='txt';}
+            else if(kzm=="exe"){imgname='exe';}
+            else if(kzm=="psd"){imgname='psd';}
+            else if(kzm=="html"||kzm=="htm"){imgname='link';}
+            else if(kzm=='mp3'||kzm=='wma'||kzm=="mod"){imgname="music";}
+            else if(kzm=="pdf"){imgname="pdf";}
+            else if(kzm=='jpg'||kzm=='png'||kzm=="gif"){imgname="img";}
+            else if(kzm=="zip"||kzm=="rar"||kzm=="7z"){imgname="zip";}
+            else if(kzm=="mov"||kzm=="mp4"||kzm=="rm"||kzm=="rmvb"||kzm=="avi"||kzm=="mkv"||kzm=="flv"||kzm=="wmv"||kzm=="mpg"){imgname="file_video";}
+            else{imgname="other";}
+
+            return imgname;
+        }
+    </script>
+{% endblock %}
+{% block page_js %}
+{% endblock %}
+
+</body>
+</html>
+
+

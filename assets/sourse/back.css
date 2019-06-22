@@ -1,0 +1,168 @@
+#task{
+    float: left;
+    width: 100%;
+}
+#task-title{
+    width: 1200px;
+    margin: 0 auto;
+}
+#task-all{
+    width: 1200px;
+    margin: 0 auto;
+}
+#task-left-block{
+    float: left;
+    position: relative;
+    border-top: solid 3px #03a9f4;
+    width: 14%;
+    background-color: white;
+    padding: 25px 0px;
+    box-shadow: 8px 4px 20px rgba(0, 0, 0, 0.09);
+    height: 500px;
+    margin-bottom: 20px;
+
+}
+#task-left-block li{
+    text-align: center;
+    margin: 10px 0px;
+    height: 40px;
+    padding: 5px;
+}
+#task-content{
+    float: left;
+
+    width: 86%;
+    background-color: #fbfbfb;
+    z-index: -1;
+    margin-top: 20px;
+    padding: 20px 50px;
+}
+#teacher_add_course>div{
+    margin: 20px 0;
+    height: 38px;
+}
+#teacher_add_course label{
+    margin-left: 70px;
+}
+.required{
+    float: left;
+}
+#teacher_add_course_立即添加,#course_edit_button,#course_delete_button{
+    margin: 6px 0;
+    box-shadow: 1px 1px 15px rgba(0, 0, 0, 0);
+    border-radius: 15px;
+background-color: #03a9f4;
+    cursor: pointer;
+width: 100%;
+    height: 51px;
+/*margin-top: 80px;*/
+font-size: 25px;
+border: 0px;
+color: white;
+transition: background-color 0.3s;
+-moz-transition: background-color 0.3s;
+-webkit-transition: background-color 0.3s;
+-o-transition: background-color 0.3s;
+    transition: box-shadow 0.3s;
+    -moz-transition: box-shadow 0.3s;
+    -webkit-transition: box-shadow 0.3s;
+    -o-transition: box-shadow 0.3s;
+}
+#teacher_add_course_立即添加:hover,#course_edit_button{
+
+    background-color: #32b7f3;
+    box-shadow: 1px 1px 15px rgba(76, 170, 19, 0.43);
+
+}
+#course_delete_button{background-color: #fbfbfb;
+    border: solid 2px #F44336;
+    color: #F44336;
+    transition: background-color 0.3s;
+    -moz-transition: background-color 0.3s;
+    -webkit-transition: background-color 0.3s;
+    -o-transition: background-color 0.3s;}
+#course_delete_button:hover{
+    color:white;
+    background-color: #fb5a4f;
+    box-shadow: 1px 1px 15px rgba(76, 170, 19, 0.43);
+
+}
+/*课程管理*/
+#added_title h1{
+    display: block;
+    font-size: 26px;
+    font-weight: 500;
+    color: #666666;
+    letter-spacing: 3px;
+    float: left;
+    margin: 5px;
+}
+#added_course_list{
+    clear: both;
+}
+#toaddcourse{
+    background: #03A9F4;
+    width: 90px;
+    height: 30px;
+    float: left;
+    line-height: 30px;
+    text-align: center;
+    color: white;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    font-size: 16px;
+    margin-top: 8px;
+}
+.added_course_img{
+    width: 150px;
+    height: 115px;
+    background-color: #efeded;
+    float: left;
+    margin: 8px;
+}
+.added_course_name{
+    display: block;
+    font-size: 40px;
+    font-weight: 500;
+    color: #333333;
+    letter-spacing: 2px;
+    margin: 0px 0px 0px 155px;
+}
+.added_course_teacher{
+    display: block;
+    font-size: 15px;
+    font-weight: 500;
+    color: #3e3e3e;
+    margin: 3px 0px 0px 158px;
+}
+.added_course{
+    width: 100%;
+    height: 130px;
+    background-color: white;
+    box-shadow: 0 0px 20px rgba(0, 0, 0, 0.05);
+    margin: 0px 10px 15px 0px;
+    float: left;
+    position: relative;
+}
+.added_course_intro{
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #969696;
+    margin: 3px 0px 0px 158px;
+    width: 500px;
+}
+.added_course_edit{
+    position: absolute;
+    right: 30px;
+    top: 40px;
+    opacity: 0.6;
+}
+.added_course_edit:hover{
+    opacity: 1;
+}
+#added_title{
+    height: 30px;
+    margin-bottom: 30px;
+    float: left;
+}

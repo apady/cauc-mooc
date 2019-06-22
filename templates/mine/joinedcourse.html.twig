@@ -1,0 +1,37 @@
+{% extends 'mine/layout.html.twig' %}
+{% block title %}已加入课程 - 航大云课{% endblock %}
+{% block stylesheets %}
+    {{ encore_entry_link_tags('back') }}
+    <style>
+        #list1,#list2,#list4,#list5{
+            color: #6f6f6f;
+            font-size: 21px;
+        }
+        #list3{
+            color: #0c0c0c;
+            font-size: 21px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div id="added_title">
+        <h1>已加入课程</h1>
+    </div>
+
+    {% for course in courseList %}
+
+        <div id="added_course_list">
+            <div class="added_course">
+                <a href="{{ path('oneCourseInfo',{'id':course.id}) }}">
+                    <img class="added_course_img" src="{{  asset(course.getCoverImg().getPath() )}}">
+                    <h2 class="added_course_name">{{ course.name }}</h2>
+
+                    <h3 class="added_course_teacher">{{ course.cate }} / {{ course.teacher.username }}</h3>
+                    <p class="added_course_intro">{{ course.info }}</p></a>
+                <a href="{{ path('courseEdit',{'id':course.id}) }}"><img class="added_course_edit" src="{{asset('img/edit.png')}}"></a>
+            </div>
+
+        </div>
+    {% endfor %}
+
+{% endblock%}
