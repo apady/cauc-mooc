@@ -2,113 +2,72 @@
 /**
  * @author lishen chen frankchenls@outlook.com
  */
-
 namespace App\Components;
 
-
-class UploadFile
+/**
+ *  Common features needed in a file.
+ */
+trait FileTrait
 {
-    use FileTrait;
-    /**
-     * @var string
-     * The absolute path of a file.
-     * eg. /home/demoFile.txt
-     */
-    private $filePath;
+    private $userId;
 
-    /**
-     * @var string
-     */
-    private $fileName;
-    /**
-     * @var array
-     * The absolute path array of all chunks .
-     * eg. ['/home/demoFile.txt_chunk_1','/home/demoFile.txt_chunk_2',...]
-     */
-    private $fileChunks=array();
-    /**
-     * @var array
-     * The digests of all chunks.
-     * These digests can be calculate via many digest algorithm,like MD5,SHA256,etc.
-     */
-    private $chunksDigest=array();
-    /**
-     * @var bool
-     * Become true when file chunks satisfy merge condition.
-     */
-    private $isCanBeMerged;
+    private $fileSize;
 
-    /**
-     * @var bool
-     * Become true when all of the file chunks are successfully merged.
-     */
-    private $isMergeCompleted;
+    private $mimeType;
 
-    private $isUploadFinished;
+    private $fileMd5;
 
+    private $mergerChunk;
 
-    public function __construct($filePath)
+    public function getUserId()
     {
-        $this->filePath=$filePath;
-        $this->isCanBeMerged=false;
-        $this->isMergeCompleted=false;
-        $this->isUploadFinished=false;
-        $this->fileName=substr($filePath,strrpos($filePath,"/")+1);
-        $this->fileChunks=\array_diff(scandir(substr($filePath,0,strrpos($filePath,"/"))),['.','..']);
+        return $this->userId;
     }
 
-    public function getFileName()
+    public function setUserId($userId)
     {
-        return $this->fileName;
+        $this->userId=$userId;
     }
 
-    public function getChunks()
+    public function getFileSize()
     {
-        return $this->fileChunks;
+        return $this->fileSize;
     }
 
-    public function getChunksDigest()
+    public function setFileSize($fileSize)
     {
-        return $this->chunksDigest;
+        $this->fileSize=$fileSize;
     }
 
-    public function setChunksDigest($chunkPath,$digest)
+    public function getMimeType()
     {
-        $this->chunksDigest[$chunkPath]=$digest;
+        return $this->mimeType;
     }
 
-    public function getFilePath()
+    public function setMimeType($mimeType)
     {
-        return $this->filePath;
-    }
-    public function setIsCanBeMergeStatus($status)
-    {
-        $this->isCanBeMerged=$status;
+        $this->mimeType=$mimeType;
     }
 
-    public function setIsMergeCompleted($status)
+    public function getFileMd5()
     {
-        $this->isMergeCompleted=$status;
+        return $this->fileMd5;
     }
 
-    public function isCanBeMerged()
+    public function setFileMd5($fileMd5)
     {
-        return $this->isCanBeMerged;
+        $this->fileMd5=$fileMd5;
     }
 
-    public function isMergeCompleted()
+    public function getMergerChunk()
     {
-        return $this->isMergeCompleted;
+        return $this->mergerChunk;
     }
 
-    public function setIsUploadFinished($status)
+    public function setMergerChunk($mergerChunk)
     {
-        $this->isUploadFinished=$status;
+        $this->mergerChunk=$mergerChunk;
     }
 
-    public function isUploadFinished()
-    {
-        return $this->isUploadFinished;
-    }
 
 }

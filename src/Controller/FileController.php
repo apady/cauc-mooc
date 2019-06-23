@@ -23,9 +23,9 @@ use App\Service\Uploader;
 
 
 class FileController extends BaseController{
-    public function autoAdd(File $file,$courseId){
-        $fileName=$file->getFileName();
-        $fileName_Last=strrchr($file->getFileName(), ".");
+    public function autoAdd($fileName,$courseId){
+        $fileName_old=$fileName;
+        $fileName_Last=strrchr($fileName, ".");
         $fileName=str_replace(strrchr($fileName_Last,"."),"",$fileName);
         $fileName=str_replace(strrchr($fileName_Last,"("),"",$fileName);
         /**
@@ -35,268 +35,85 @@ class FileController extends BaseController{
 
         $count=count($repo->getSameFileNameInCourseResource($fileName,$courseId));
         if($count>0){
-        $auto_fileName=str_replace(strrchr($fileName, "."),"",$fileName).'('.$count.')'.$fileName_Last;
-        return $auto_fileName;
+            $auto_fileName=str_replace(strrchr($fileName, "."),"",$fileName).'('.$count.')'.$fileName_Last;
+            return $auto_fileName;
         }else
-            return $file->getFileName();
+            return $fileName_old;
     }
-
+    public function getPath($courseId,$fileName)
+    {
+        $path2 = $this->getUser()->getUsername().$this->getUser()->getId();//获取用户id
+        $path3 = $courseId;//获取课程名字
+        $path4 = '教学资源';//获取url传入的路径
+        return $this->getParameter('data_directory').$path2.'/'.$path3.'/'.$path4.'/'.$fileName.'/';
+    }
     /**
      * @Route("/file/upload-check/{courseId}", name="fileUploadCheck")
      */
     public function uploadCheckAction(Request $request,$courseId){
-        $fileName=$request->request->get('fileName');
-        $fileName2=str_replace(strrchr($fileName, "."),"",$fileName);
-        if($fileName2==null) {
-           return new JsonResponse(['fileName'=>false]);
-        }
-        $em = $this->getDoctrine()->getManager();
-        $course=$em->getRepository('App:Courses')
-            ->find($courseId);
-        $em = $this->getDoctrine()->getManager();
-        $file=$em->getRepository('App:File')
-            ->findOneByPath(
-                '/'.$this->getUser()->getUsername().$this->getUser()->getId().'/'.$course->getName().'/教学资源/'.$fileName
-            );
-        if($file!=null){
-           // $this->autoAdd($file,$courseId);
-            return new JsonResponse(['success'=>1,'name'=>$this->autoAdd($file,$courseId)]);
-        }
-        $dir =$this->getParameter('apady_directory').$this->getUser()->getId().$fileName2;
-        if(!file_exists($dir))
-            return new JsonResponse(['type'=>0]);
-        $md5list_path=$dir.'/md5list.txt';
-        if(!file_exists($md5list_path))
-            return new JsonResponse(['type'=>1]);
-        $md5File = @file($md5list_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if($md5File==NULL)
-            return new JsonResponse(['type'=>1]);
-        $block_info=scandir($dir);
-        foreach ($block_info as $key => $block) {
-            if ($block == '.' || $block == '..'||$block=='md5list.txt')
-                unset($block_info[$key]);
-            else{
-//                $md5=mymd5($dir."/".$block);
-//                if(!in_array($md5,$md5File)){
-//                    @unlink($dir."/".$block);
-//                    unset($block_info[$key]);
-//                }else{
-//                    array_push($record_md5,$md5);
-//                }
+        $md5Path=$this->getParameter('apady_directory').$this->getUser()->getId().'/';
+        $md5=$request->request->get('md5');
+        $fileName=$this->autoAdd($request->request->get('fileName'),$courseId);
+        if(file_exists($md5Path)){
+            if(file_exists($md5Path.$md5)){
+                $handle=@fopen($md5Path.$md5,'r');
+                $file_dir=fgetc($handle);
+                return new JsonResponse(['exist'=>1,'file_dir'=>$file_dir,'name'=>$fileName]);
             }
         }
-//        @unlink($md5list_path);
-//        file_put_contents($md5list_path, join($record_md5, "\n"));
-        $count_block=count($block_info);
-        return  new JsonResponse(['block_count'=>$count_block,'type'=>1]);
+        return new JsonResponse(['exist'=>0,'file_dir'=>NULL,'name'=>$fileName]);
     }
     /**
-     * @Route("/file/md5", name="fileMd5")
+     * @Route("/file/get-chunks",name="fileGetChunks")
      */
-    public function recordMd5Action(Request $request)
-    {
-        $fileName=$request->request->get('fileName');
-        $block_md5=$request->request->get('md5');
-        $fileName2=str_replace(strrchr($fileName, "."),"",$fileName);
-        $uploadDir=$this->getParameter('apady_directory').$this->getUser()->getId().$fileName2."/";
-        if (!file_exists($uploadDir))
-            mkdir ($uploadDir,0755,true);
-        $md5list_path=$uploadDir.'md5list.txt';
-        $md5File = @file($md5list_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        $md5File = $md5File ? $md5File : array();
-        if(in_array($block_md5,$md5File))
-            return new JsonResponse(["exist"=>1]);
-        else {
-            array_push($md5File, $block_md5);
-            $md5File = array_unique($md5File);
-            file_put_contents($md5list_path, join($md5File, "\n"));
-            return new JsonResponse(["success" => 1]);
+    public function getChunksAction(Request $request,RedisService $redis){
+        $redis=$redis->getRedisClient();
+        $key=$this->getUser()->getId().$request->request->get('fileName');
+        $chunk_array=array();
+        if($redis->exists($key)){
+            $chunk_array=$redis->smembers($key);
+            $len=count($chunk_array);
+            $chunk_array['size']=$len;
+            for($i=0;$i<$len;$i++){
+                $chunk_array[$i]=$chunk_array[$i]-'0';
+            }
+        }else{
+            $chunk_array['size']=0;
         }
+        return new JsonResponse($chunk_array);
     }
     /**
-     * 接受文件分块
-     * 提交post请求 包括：
-     * 当前是第几块文件分块:chuck
-     * 当前文件分块的md5值:md5
-     * 文件名:filename
-     * 临时文件名:temp_filename
-     * 成功接到分片就返回1
      *
-     * @Route("/file/upload-index", name="fileUploadIndex")
+     * @Route("/file/upload-index/{courseId}", name="fileUploadIndex")
      */
-    public function indexAction(Request $request,Uploader $uploader)
+    public function indexAction(Request $request,Uploader $uploader,$courseId,RedisService $redis)
     {
-        if ($request->request->get('name')!=NULL) {
-            $fileName = $request->request->get('name');
-        } elseif ($request->files->get('fileName')!=NULL) {
-            $fileName = $request->files->get('fileName');
-        } else {
+        if ($request->request->get('newFileName')!=NULL) {
+            $fileName = $request->request->get('newFileName');
+        }else {
             $fileName = uniqid("file_");
         }
-        $fileName2=str_replace(strrchr($fileName, "."),"",$fileName);
+
+        $realpath= $request->files->get('file')->getPathname();
         $chunk=$request->request->get('chunk');
-        $uploadDir=$this->getParameter('apady_directory').$this->getUser()->getId().$fileName2."/";
-        if (!file_exists($uploadDir))
-            mkdir ($uploadDir,0755,true);
-        $file=$request->files->get('file');
-        $realpath=$file->getPathname();
-
-        if($request->request->get('chunk')==NULL) {
-            move_uploaded_file($realpath, $uploadDir.$fileName);
+        if($chunk==NULL){
+            $chunk=-1;
         }
-        else {
-            move_uploaded_file($realpath,$uploadDir.$chunk);
-        }
+        $chunks=$request->request->get('chunks');
 
-        $md5list_path=$uploadDir.'md5list.txt';
-        $md5File = @file($md5list_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        $md5File = $md5File ? $md5File : array();
+        $file=new ResourceFile($this->getPath($courseId,$fileName),$fileName,$chunk,$chunks);
+        $file->setCourseID($courseId);
+        $file->setUserId($this->getUser()->getId());
+        $file->setFileSize($request->request->get('size'));
+        $file->setMimeType($request->request->get('type'));
+        $file->setFileMd5($request->request->get('md5'));
 
-        /**
-         * To do list.
-         * 如下是课程资源是上传样例
-         */
-
-        $file=new ResourceFile($uploadDir.$fileName);
-        $file->setCourseID(12345);
-        $file->setUserId(122);
-        $file->setFileSize(1234);
-        $file->setMimeType('type');
-
-        //$file=new UploadFile($uploadDir.$fileName);
-        $res=$uploader->handle($file,$uploadDir.$chunk);
+        $res=$uploader->handle($file,$realpath);
 
         $response=new JsonResponse();
         $response->setEncodingOptions(JSON_UNESCAPED_UNICODE);
         $response->setData($res);
         return $response;
-
-//        function mymd5( $file ) {
-//            $fragment = 65536;
-//            $rh = fopen($file, 'rb');
-//            $size = filesize($file);
-//            $part1 = fread( $rh, $fragment );
-//            fseek($rh, $size-$fragment);
-//            $part2 = fread( $rh, $fragment);
-//            fclose($rh);
-//            return md5( $part1.$part2 );
-//        }
-//        if($request->request->get('chunk')!=NULL){
-//            $isin=in_array(mymd5($uploadDir.$chunk),$md5File);
-//            if(!$isin){
-//                return new JsonResponse(["success"=>"0"]);
-//            }
-//        }else{
-//            $isin=in_array(mymd5($uploadDir.$fileName),$md5File);
-//            if(!$isin){
-//                return new JsonResponse(["success"=>"0"]);
-//            }
-//        }
-//        return new JsonResponse(["success"=>"1"]);
-    }
-    /**
-     * 这一步是合并文件分块
-     * 提交Post请求：
-     * 文件名:filename
-     * 临时文件名:temp_filename
-     * 文件的md5值(不是文件分块的md5值):md5
-     * 文件大小:size
-     * 文件种类:type
-     * 课程id:id
-     * 上传的路径:dir
-     * 成功merge返回1
-     *
-     * @Route("/file/upload-merge", name="fileUploadMerge")
-     */
-    public function mergeFileAction(Request $request){
-        $fileName=$request->request->get('fileName');
-        $fileName2=str_replace(strrchr($fileName, "."),"",$fileName);
-        $chunk_array=scandir($this->getParameter('apady_directory').$this->getUser()->getId().$fileName2);
-
-        foreach ($chunk_array as $key => $chunk) {
-            if ($chunk == '.' || $chunk == '..') unset($chunk_array[$key]);
-        }
-        natsort($chunk_array);
-
-        $uploadDir=$this->getParameter('apady_directory')."/".$this->getUser()->getId().$fileName2."/";
-        $saveFileDir=$this->getParameter('apady_directory').'saveFile/';
-        if(!file_exists($saveFileDir)){
-            mkdir($saveFileDir,0755);
-        }
-        $out=@fopen($saveFileDir.$fileName,"wb");
-        if (!$out)
-            return new JsonResponse(["success"=>"0"]);
-        if(flock($out,LOCK_EX)){
-            foreach($chunk_array as $chunk){
-                $in=fopen($uploadDir.$chunk,"rb");
-                if(!$in)
-                    break;
-                while($buff=fread($in,4096)){
-                    fwrite($out,$buff);
-                }
-
-                @fclose($in);
-                @unlink($uploadDir.$chunk);
-            }
-        }
-        flock($out, LOCK_UN);
-
-        @fclose($out);
-       @rmdir($uploadDir);
-
-        function mymd5( $file ) {
-            $fragment = 65536;
-            $rh = fopen($file, 'rb');
-            $size = filesize($file);
-            $part1 = fread( $rh, $fragment );
-            fseek($rh, $size-$fragment);
-            $part2 = fread( $rh, $fragment);
-            fclose($rh);
-            return md5( $part1.$part2 );
-        }
-        if($request->request->get('md5')!=mymd5($saveFileDir)) {
-            return new JsonResponse(["success"=>"1"]);
-        }else{
-            return new JsonResponse(["success"=>"0"]);
-        }
-    }
-    /**
-     * 将文件信息persist到数据库
-     * 将文件persist BFS
-     * 成功persist返回1
-     *
-     * @Route("/file/upload-persist/{courseId}", name="fileUploadPersist",requirements={"courseId"="\d+"})
-     */
-    public function persistFileAction(Request $request,$courseId){
-        $em = $this->getDoctrine()->getManager();
-        $course=$em->getRepository('App:Courses')
-            ->find($courseId);
-        if ($course==NULL){
-            throw $this->createNotFoundException('The course is not existed');
-        }
-        $path2 = $this->getUser()->getUsername().$this->getUser()->getId();//获取用户id
-        $path3 = $course->getName();//获取课程名字
-        $path4 = '教学资源';//获取url传入的路径
-        $fileName=$request->request->get('fileName');
-        $targetdir = "/".$path2 . "/" . $path3 . "/" . $path4 . "/" . $fileName;
-        $saveFileDir=$this->getParameter('apady_directory').'saveFile/'.$fileName;
-        try {
-            $bfs = new FileSystem($this->getParameter('bfs_flag'));
-            $bfs->put($saveFileDir, $targetdir);
-        }catch (IOExceptionInterface $exception){
-            return new JsonResponse(["error"=>$exception->getMessage()]);
-        }
-        $file=new File();
-        $file->setUser($this->getUser());
-        $file->setMimeType($request->request->get('fileType'));
-        $file->setSize($request->request->get('fileSize'));
-        $file->setFileName($fileName);
-        $file->setPath($targetdir);
-        $em->persist($file);
-        $course->addResourceFile($file);
-        $em->flush();
-        @unlink($saveFileDir);
-       return new JsonResponse(["success"=>"1"]);
 
     }
     /**
@@ -309,15 +126,15 @@ class FileController extends BaseController{
             ->find($fileId);
         $tag=substr(substr(microtime(),0,strripos(microtime(),' ')),strripos(microtime(),'.')+1);
         if($file==NULL)
-            throw $this->createNotFoundException('The course does not exist');
+            throw $this->createNotFoundException('The file does not exist');
         $url=$urlEncode->UrlEncode('123',$file->getId().'/'.$tag);
-        $redis->getRedisClient()->set($url,$file->getId(),60*60*15);
+        $redis->getRedisClient()->set($url,$file->getId(),60*15);
         return new JsonResponse(['url'=>$url]);
     }
     /**
      * @Route("/file/download/{encode_string}", name="downloadFile")
      */
-    public function  downFileAction($encode_string,UrlEncode $urlEncode,RedisService $redis)
+    public function  downFileAction($encode_string,RedisService $redis)
     {
         $redis=$redis->getRedisClient();
         if($redis->get($encode_string)==null)
@@ -328,67 +145,22 @@ class FileController extends BaseController{
             ->find($fileId);
         if($file==NULL)
             throw $this->createNotFoundException('The file does not exist');
-        $downloadDir=$this->getParameter('apady_directory').'downloadFile/';
-        if(!file_exists($downloadDir)){
-            mkdir($downloadDir,0755);
-        }
-        $downloadFileDir=$downloadDir.$file->getFileName()."/";
-        if(!file_exists($downloadFileDir)){
-            mkdir($downloadFileDir,0755);
-        }
-        $targetdir=$file->getPath();
-        try {
-            $bfs = new FileSystem($this->getParameter('bfs_flag'));
-            touch($downloadFileDir.$file->getFileName());
-            $stream=new Stream($downloadFileDir.$file->getFileName());
-            $response = new BinaryFileResponse($stream);
 
-            $response->headers->set('Content-Type', 'text/plain');
-            $response->setContentDisposition ( ResponseHeaderBag::DISPOSITION_ATTACHMENT, $file->getFileName());
-            $bfs->get($targetdir, $downloadFileDir);
-            return $response;
-        }catch (IOExceptionInterface $exception){
-            return new JsonResponse(["error"=>$exception->getMessage()]);
+        header('content-type:application/octet-stream');
+        header('Accept-Ranges:bytes');
+        header('Accept-Length:'.$file->getSize());
+        header('content-disposition:attachment;filename='.$file->getFileName());
+
+        $filePath=$this->getParameter('data_directory').$file->getPath().$file->getFileName();
+        $handle=fopen($filePath,"r");
+        while(!feof($handle)){
+            echo fread($handle,4096);
+            flush();
         }
+        fclose($handle);
 
-
+        return new JsonResponse(['success'=>1]);
     }
-
-    /**
-     * @Route("/file/get/{encode_string}", name="fileGet")
-     */
-    public function getFileAction($encode_string,UrlEncode $urlEncode,RedisService $redis,Request $request)
-    {
-        $redis=$redis->getRedisClient();
-        $key=$redis->get($encode_string);
-        $fileId=substr($urlEncode->Urldecrypt($key,$encode_string),0,stripos($urlEncode->Urldecrypt($key,$encode_string),'/'));
-        $em = $this->getDoctrine()->getManager();
-        $file=$em->getRepository('App:File')
-            ->find($fileId);
-        if($file==NULL)
-            throw $this->createNotFoundException('The file does not exist');
-        $downloadDir=$this->getParameter('apady_directory').'downloadFile/';
-        if(!file_exists($downloadDir)){
-            mkdir($downloadDir,0755);
-        }
-        $downloadFileDir=$downloadDir.$file->getFileName()."/";
-        if(!file_exists($downloadFileDir)){
-            mkdir($downloadFileDir,0755);
-        }
-        $targetdir=$file->getPath();
-        try {
-            $bfs = new FileSystem($this->getParameter('bfs_flag'));
-            $bfs->get($targetdir, $downloadFileDir);
-        }catch (IOExceptionInterface $exception){
-            return new JsonResponse(["error"=>$exception->getMessage()]);
-        }
-        $response = new BinaryFileResponse ($downloadFileDir.$file->getFileName());
-        $response->headers->set('Content-Type', 'text/plain');
-        $response->setContentDisposition ( ResponseHeaderBag::DISPOSITION_ATTACHMENT, $file->getFileName());
-        return $response;
-
-    }
-
     /**
      * @Route("/file/remove/{fileId}/{courseId}", name="fileRemove")
      */
@@ -413,6 +185,7 @@ class FileController extends BaseController{
             throw $this->createNotFoundException('The file is not existed');
         }
         try {
+            $bfs->remove($file->getPath().$file->getFileName());
             $bfs->remove($file->getPath());
         }catch (IOExceptionInterface $exception){
             return new JsonResponse(["error"=>$exception->getMessage()]);

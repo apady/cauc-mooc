@@ -112,13 +112,13 @@
                     <div id="file-category">
                         <div id="fileTags"></div>
                         {#<ul>#}
-                            {#<li onclick="acategory(this);return false;" style="background-color: #4bb9ea;">全部</li>#}
-                            {#<li onclick="acategory(this);return false;" style="background-color: #939c9c;">测试</li>#}
-                            {#{% for tag in tags %}#}
+                        {#<li onclick="acategory(this);return false;" style="background-color: #4bb9ea;">全部</li>#}
+                        {#<li onclick="acategory(this);return false;" style="background-color: #939c9c;">测试</li>#}
+                        {#{% for tag in tags %}#}
 
-                                {#<li onclick="acategory(this);return false;" style="background-color: #939c9c;">{{ tag.tag }}</li>#}
-                            {#{% endfor %}#}
-                            {#<li onclick="setcategory(this);return false;" style="background-color: #939c9c;"><img src="{{ asset('img/setcategory.svg') }}" style="height: 20px;"></li>#}
+                        {#<li onclick="acategory(this);return false;" style="background-color: #939c9c;">{{ tag.tag }}</li>#}
+                        {#{% endfor %}#}
+                        {#<li onclick="setcategory(this);return false;" style="background-color: #939c9c;"><img src="{{ asset('img/setcategory.svg') }}" style="height: 20px;"></li>#}
                         {#</ul>#}
                         <div id="file-upload" onclick="showModal();return false;">
                             <img src="{{ asset('img/plus.svg') }}" style="height: 21px;left: 3px;">
@@ -138,40 +138,40 @@
 
     {#上传功能#}
     {% if is_granted('ROLE_TEACHER') %}
-    <!--遮罩-->
-    <div class="overlay"></div>
-    <!--上传框-->
-    <div class="dropbox"  id="modal" style="z-index: -100;">
-        <div id="close" style="cursor:pointer;float: right;width:20px" onclick="closeModal();return false;">
-            <span class="css-close"></span>
-        </div>
-        <div id="wrapper" >
-            <div id="container">
-                <!--头部，相册选择和格式选择-->
+        <!--遮罩-->
+        <div class="overlay"></div>
+        <!--上传框-->
+        <div class="dropbox"  id="modal" style="z-index: -100;">
+            <div id="close" style="cursor:pointer;float: right;width:20px" onclick="closeModal();return false;">
+                <span class="css-close"></span>
+            </div>
+            <div id="wrapper" >
+                <div id="container">
+                    <!--头部，相册选择和格式选择-->
 
-                <div id="uploader" style="height: 270px;">
-                    <div class="queueList" style="height: 317px;overflow: auto;margin: 20px;">
-                        <div id="dndArea" class="placeholder" style="position: absolute;width: 600px;">
-                            <div id="filePicker"></div>
-                            <p>或将文件拖到这里，单次最多可选30个</p>
+                    <div id="uploader" style="height: 270px;">
+                        <div class="queueList" style="height: 317px;overflow: auto;margin: 20px;">
+                            <div id="dndArea" class="placeholder" style="position: absolute;width: 600px;">
+                                <div id="filePicker"></div>
+                                <p>或将文件拖到这里，单次最多可选30个</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="statusBar" style="display:none;">
-                        <div class="progress" >
-                            <span class="text">0%</span>
-                            <span class="percentage"></span>
-                        </div><div class="info"></div>
-                        <div class="btns">
-                            <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+                        <div class="statusBar" style="display:none;">
+                            <div class="progress" >
+                                <span class="text">0%</span>
+                                <span class="percentage"></span>
+                            </div><div class="info"></div>
+                            <div class="btns">
+                                <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
-{% endif %}
+    {% endif %}
 
 
 
@@ -180,13 +180,11 @@
 {% block page_js %}
     <script>
         //文件上传URL全局变量
-        window.file_upload_index_url ='{{ path('fileUploadIndex') }}'
-        window.file_upload_merge_url ='{{ path('fileUploadMerge') }}'
+        window.file_upload_index_url ='{{ path('fileUploadIndex',{'courseId':course.id}) }}'
         window.file_upload_check_url ='{{ path('fileUploadCheck',{'courseId':course.id}) }}'
-        window.file_md5_url ='{{ path('fileMd5') }}'
-        window.file_persist_url ='{{ path('fileUploadPersist',{'courseId':course.id}) }}'
+        window.file_get_chunks_url ='{{ path('fileGetChunks') }}'
 
-       //加入课程
+        //加入课程
 
         function joinCourse(){
 
@@ -200,7 +198,7 @@
                 success:function (data) {
                     if(data.status==200){
 
-                            $("#join_the_course").css("background-color", "rgba(16, 0, 8, 0.2)");
+                        $("#join_the_course").css("background-color", "rgba(16, 0, 8, 0.2)");
 
                         $("#join_status").html("已加入");
 
@@ -332,7 +330,7 @@
             }
 
             modalFrame("添加到","small",formSelect("setTagSelect","选择分类",getTags,nowtag,"tag")+
-            formButton("确定","setFileTagSubmit("+fileid+")"))
+                formButton("确定","setFileTagSubmit("+fileid+")"))
 
         }
         function setFileTagSubmit(fileid){
@@ -384,65 +382,65 @@
                 type:"get",
                 url:"{{ path('getResourceFiles',{'id':course.id}) }}",                      //请求URL,对应后台Controller中的路由
                 success:function(data){                    //后台返回响应结果时会自动执行该回调函数
-                var gh=0;//隔行换色标志
-                $("#fileTotal").text(data.length);
-                for(var p in data){
+                    var gh=0;//隔行换色标志
+                    $("#fileTotal").text(data.length);
+                    for(var p in data){
 
-                //文件图标
-                imgurl=data[p].type;
-                imgurl=getFileIcon(imgurl.toLowerCase());
-                //截取文件名
-                    data[p].file_name=splitFileName(data[p].file_name);
-                //过长文件名处理
-                    //
-                    var shortName=data[p].file_name;
-                    if(data[p].file_name.length>=10) {
-                        shortName=data[p].file_name.substring(0,10)+"…";
+                        //文件图标
+                        imgurl=data[p].type;
+                        imgurl=getFileIcon(imgurl.toLowerCase());
+                        //截取文件名
+                        data[p].file_name=splitFileName(data[p].file_name);
+                        //过长文件名处理
+                        //
+                        var shortName=data[p].file_name;
+                        if(data[p].file_name.length>=10) {
+                            shortName=data[p].file_name.substring(0,10)+"…";
+                        }
+                        //隔行变色
+                        gh++;
+                        var bgcolor=gh%2==1?"#fafbff":"white";
+                        $("#leftfield").prepend("<div class=\"totag-"+data[p].file_tag_id+" content-project\" startcolor=\""+bgcolor+"\" style=\"background-color: "+bgcolor+";\">\n" +
+                            "                            <img src=\"/img/fileicon/"+imgurl+".svg\">\n" +
+                            "                            <div class=\"content-text\">\n" +
+                            "                            <p title=\""+data[p].file_name+"\" class=\"content-text-name\"><a class=\"content-zuoye\">["+data[p].type+"]</a>"+shortName+"</p>\n" +
+                            "                            <p class=\"content-text-info\">大小:"+data[p].size+" <rq>/ 修改日期:"+data[p].updated_at+"</rq></p>\n" +
+                            "                            </div>\n" +
+                            "                            <button onclick=\"downloadFile("+data[p].id+")\" class=\"button-download\" target=\"view_window\" style=\"display: none;\">下载</button>\n" +
+                            "                            <button class=\"button-more\" style=\"display: none;\">···</button>\n" +
+                            "                            <div class=\"morelist\"><ul>\n" +
+                            "                                    <li>预览</li>\n" +
+                            "                                    <li onclick=\"selectShareWay("+data[p].id+");\">分享</li>\n" +
+                            "                                    <li onclick='renamefile(\""+data[p].file_name+"\","+data[p].id+",{{ course.id }});'>重命名</li>\n" +
+                            "                                    <li onclick=\"setFileTag("+data[p].id+","+data[p].file_tag_id+");\">添加到</li>\n" +
+                            "                                    <li onclick='removefile(\""+data[p].id+"\",{{ course.id }});'>删除</li>\n" +
+                            "                                </ul></div>\n" +
+                            "                        </div>");
+                        $("#leftfield").children().bind("mouseover",function () {
+
+                            $(this).css("background-color","#F2F9FF");
+                            $(this).find(".button-download").css("display","block");
+                            $(this).find(".button-more").css("display","block");
+                        });
+                        $(".button-more").bind("mouseover",function () {
+                            $(this).next().css("display","block");
+                        });
+                        $(".button-more").bind("mouseout",function () {
+                            $(this).next().css("display","none");
+                        });
+                        $(".morelist").bind("mouseout",function () {
+                            $(this).css("display","none");
+                        });
+                        $(".morelist").bind("mouseover",function () {
+                            $(this).css("display","block");
+                        });
+                        $("#leftfield").children().bind("mouseout",function () {
+
+                            $(this).css("background-color",$(this).attr("startcolor"));
+                            $(this).find(".button-download").css("display","none");
+                            $(this).find(".button-more").css("display","none");
+                        });
                     }
-                //隔行变色
-                    gh++;
-                    var bgcolor=gh%2==1?"#fafbff":"white";
-                    $("#leftfield").prepend("<div class=\"totag-"+data[p].file_tag_id+" content-project\" startcolor=\""+bgcolor+"\" style=\"background-color: "+bgcolor+";\">\n" +
-                        "                            <img src=\"/img/fileicon/"+imgurl+".svg\">\n" +
-                        "                            <div class=\"content-text\">\n" +
-                        "                            <p title=\""+data[p].file_name+"\" class=\"content-text-name\"><a class=\"content-zuoye\">["+data[p].type+"]</a>"+shortName+"</p>\n" +
-                        "                            <p class=\"content-text-info\">大小:"+data[p].size+" <rq>/ 修改日期:"+data[p].updated_at+"</rq></p>\n" +
-                        "                            </div>\n" +
-                        "                            <button onclick=\"downloadFile("+data[p].id+")\" class=\"button-download\" target=\"view_window\" style=\"display: none;\">下载</button>\n" +
-                        "                            <button class=\"button-more\" style=\"display: none;\">···</button>\n" +
-                        "                            <div class=\"morelist\"><ul>\n" +
-                        "                                    <li>预览</li>\n" +
-                        "                                    <li onclick=\"selectShareWay("+data[p].id+");\">分享</li>\n" +
-                        "                                    <li onclick='renamefile(\""+data[p].file_name+"\","+data[p].id+",{{ course.id }});'>重命名</li>\n" +
-                        "                                    <li onclick=\"setFileTag("+data[p].id+","+data[p].file_tag_id+");\">添加到</li>\n" +
-                        "                                    <li onclick='removefile(\""+data[p].id+"\",{{ course.id }});'>删除</li>\n" +
-                        "                                </ul></div>\n" +
-                        "                        </div>");
-                    $("#leftfield").children().bind("mouseover",function () {
-
-                        $(this).css("background-color","#F2F9FF");
-                        $(this).find(".button-download").css("display","block");
-                        $(this).find(".button-more").css("display","block");
-                    });
-                    $(".button-more").bind("mouseover",function () {
-                        $(this).next().css("display","block");
-                    });
-                    $(".button-more").bind("mouseout",function () {
-                        $(this).next().css("display","none");
-                    });
-                    $(".morelist").bind("mouseout",function () {
-                        $(this).css("display","none");
-                    });
-                    $(".morelist").bind("mouseover",function () {
-                        $(this).css("display","block");
-                    });
-                    $("#leftfield").children().bind("mouseout",function () {
-
-                        $(this).css("background-color",$(this).attr("startcolor"));
-                        $(this).find(".button-download").css("display","none");
-                        $(this).find(".button-more").css("display","none");
-                    });
-                }
 
                 },
                 error:function(data){
@@ -521,19 +519,19 @@
         function removefile(fid,cid){
             var r=confirm("确定删除该文件？");
             if(r==true){
-            $.ajax({                                 //AJAX
-                type:"get",
-                url:'{{ path('fileRemove',{'fileId':'fileId','courseId':'courseId'})}}'.replace('fileId',fid).replace('courseId',cid),                      //请求URL,对应后台Controller中的路由
-                success:function(data){
-                    filelist();
-                    messageOk("删除成功")
-                },
+                $.ajax({                                 //AJAX
+                    type:"get",
+                    url:'{{ path('fileRemove',{'fileId':'fileId','courseId':'courseId'})}}'.replace('fileId',fid).replace('courseId',cid),                      //请求URL,对应后台Controller中的路由
+                    success:function(data){
+                        filelist();
+                        messageOk("删除成功")
+                    },
 
-                error:function(data){
-                    alert("服务器添加失败");
-                },
-                dataType:"json"
-            })
+                    error:function(data){
+                        alert("服务器添加失败");
+                    },
+                    dataType:"json"
+                })
             }
         }
 

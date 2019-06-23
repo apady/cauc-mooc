@@ -5,6 +5,7 @@
 namespace App\Event;
 use App\Components\UploadFile;
 
+
 class FileChunkArrivedEvent extends FileEvent
 {
     private $chunkPath;
@@ -17,7 +18,6 @@ class FileChunkArrivedEvent extends FileEvent
     }
 
     public function getChunkPath(){
-
         return $this->chunkPath;
     }
 

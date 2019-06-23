@@ -1,11 +1,3 @@
-/*
- * Welcome to your app's main JavaScript file!
- *
- * We recommend including the built version of this JavaScript file
- * (and its CSS file) in your base layout (base.html.twig).
- */
-
-// any CSS you require will output into a single css file (app.css in this case)
 require('../sourse/uploader.css');//上传框
 require('../sourse/course.css');
 
@@ -151,20 +143,41 @@ require('../sourse/course.css');
             return;
         }
         var file_md5   = '';   // 用于保存文件的md5值
-        var block_count =-1;
-        var type=0;
+        var exist=0;
+        var fileName;
+        var size=0;
+        var chunk_array=new Array();
         WebUploader.Uploader.register({
             "before-send-file":"beforeSendFile",
             "before-send":"beforeSend",
         },{
             "beforeSendFile":function (file) {
+               if(exist){
+              //   alert('该文件已经存在');
+               }else{
+                   $.post(file_get_chunks_url, {fileName: file.name}, function (data) {
+                       if(data.size) {
+                           size = data.size;
+                           for(i=0; i<100000;i++){
+                               chunk_array[i]=0;
+                           }
+                           for (i = 0; i < size; i++) {
+                               chunk_array[data[i]] = 1;
+                           }
+                       }
+                   });
+               }
+
             },
             "beforeSend": function (block) {
-                var file=block.file;
                 var deferred = WebUploader.Deferred();
-                if (block.chunk<block_count) {
-                    deferred.reject();
-                } else {
+                if(size){
+                    if(chunk_array[block.chunk]){
+                        deferred.reject();
+                    }else {
+                        deferred.resolve();
+                    }
+                }else{
                     deferred.resolve();
                 }
                 return deferred.promise();}
@@ -179,7 +192,7 @@ require('../sourse/course.css');
             chunked: true,                //开启分片上传
             chunkSize: 1024 * 1024 * 2,   //每一片的大小
             chunkRetry: 10,              // 如果遇到网络错误,重新上传次数
-            threads: 3,                    // [默认值：3] 上传并发数。允许同时最大上传进程数。
+            threads: 1,                    // [默认值：3] 上传并发数。允许同时最大上传进程数。
             fileNumLimit: 30,
             fileSizeLimit: 10000 * 1024 * 1024,    // 200 M
             fileSingleSizeLimit: 10000 * 1024 * 1024
@@ -216,6 +229,7 @@ require('../sourse/course.css');
         uploader.on('ready', function() {
             window.uploader = uploader;
         });
+
 
         // 当有文件添加进来时执行，负责view的创建
         function addFile( file ) {
@@ -502,20 +516,14 @@ require('../sourse/course.css');
             }
             addFile( file );
             updateTotalProgress();
-            $.post(file_upload_check_url, {fileName: file.name}, function (data) {
-                // 如果有对应的分片，推入数组
-                if(data.success){
-                    file.name=data.name;
-                    alert(file.name);
-                }
-                if(data.type) {
-                    block_count = data.block_count;
-                }
-            });
-            uploader.md5File(file)
+            uploader.md5File(file,0,10*1024*1024)
                 .then(function (fileMd5) {
                     file.wholeMd5 = fileMd5;
                     file_md5 = fileMd5;
+                    $.post(file_upload_check_url, {fileName: file.name,md5: fileMd5}, function (data) {
+                        fileName=data.name;
+                        exist=data.exist;
+                    });
                 });
             setState( 'ready' );
         };
@@ -529,17 +537,12 @@ require('../sourse/course.css');
             updateTotalProgress();
         };
         uploader.onUploadBeforeSend = function (block,data) {
+            data.newFileName=fileName;
+            data.md5=file_md5;
         }
-        uploader.onUploadComplete = function(file){
-            $.post(file_upload_merge_url, { md5:file.wholeMd5, fileName: file.name}, function (data) {
-                if(data.success){
-                    $.post(file_persist_url,{fileName: file.name,fileType: file.type,fileSize:file.size }, function (data) {
-                        if(data.success)
-                        filelist();
-                        messageOk("上传成功");
-                    });
-                }
-            });
+        uploader.onUploadComplete = function(){
+                filelist();
+                messageOk("上传成功");
         }
         uploader.on( 'all', function( type ) {
             var stats;

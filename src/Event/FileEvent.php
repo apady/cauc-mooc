@@ -44,8 +44,4 @@ class FileEvent extends Event
         return $this->file->getChunks();
     }
 
-
-
-
-
 }

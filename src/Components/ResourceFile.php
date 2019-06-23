@@ -2,7 +2,6 @@
 /**
  * @author lishen chen frankchenls@outlook.com
  */
-
 namespace App\Components;
 
 /**
@@ -23,8 +22,4 @@ class ResourceFile extends UploadFile
     {
         $this->courseId=$courseId;
     }
-
-
-
-
 }
