@@ -5,3 +5,7 @@ parameters:
     data_directory: '/mnt/bfs/'
     coverImg_directory: 'img/'
     time_zone: 'Asia/Shanghai'
+    SMSAccessKeyId :
+    SMSAccessKeySecret :
+    bfs_flag : '/home/bfs/sandbox/bfs.flag'
+    apady_directory : '/var/www/html/apady/public/'
