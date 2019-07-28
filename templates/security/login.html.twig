@@ -1,0 +1,77 @@
+{% extends 'layout.html.twig' %}
+{% block title %}登录 - 教学云平台{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('register') }}
+{% endblock %}
+{% block header %}
+{% endblock %}
+{% block body %}
+<div style="float: left;width: 100%;height: auto;margin:85px 0 100px;">
+    <div style="position:relative;border-radius: 10px;background-color: white;width: 500px;height: 543px;margin:0 auto;margin-top: 20px;margin-bottom: 20px;box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.10); ">
+        <div style="border-radius: 10px;height: 70px;background-color: #fbfbfb;border-bottom: solid 2px #ececec;">
+            <a id="tab-login" class="tab-now" style="border-radius: 10px 0 0 0;" >登录</a>
+            <a id="tab-register" class="tab" style="border-radius: 0 10px 0 0;">注册</a>
+        </div>
+        {% if error %}
+            <div class="alert alert-danger tip">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+        <div id="login-form" style="padding-top: 41px;display: block;">
+            <div><img style="width: 500px; margin-left: -20px; margin-top: -43px;" src="{{ asset('img/cover.jpg') }}"></div>
+            <form method="post">
+
+                <div class="rinput" style="margin-top: 24px;"><input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" placeholder="用户名" required autofocus></div>
+                <div class="rinput"><input type="password" name="password" id="inputPassword" class="form-control" placeholder="密码" required></div>
+
+                <input type="hidden" name="_csrf_token"
+                       value="{{ csrf_token('authenticate') }}"
+                >
+                <div class="rinput"><button id="login-submit" class="btn btn-lg btn-primary" type="submit">
+                    登录
+                    </button></div>
+            </form>
+
+        </div>
+        {#register#}
+
+        <div id="register-form" style="    padding-top: 41px;display: none;">
+            <div class="tip">提示</div>
+
+
+
+            <div class="rinput"><input type="text" id="username" name="username" autocomplete="off" placeholder="用户名"><div class="tiplight" id="tiplight1"></div></div>
+            <div class="rinput"> <input type="password" id="password" name="password" autocomplete="off" placeholder="密码（6-16个字符组成，区分大小写）" ><div class="tiplight" id="tiplight2"></div></div>
+            <div class="rinput"  style="margin-top: 30px"><input id="phonenumber" type="text" name="phonenumber" autocomplete="off" placeholder="填写常用手机号"  ><div class="tiplight" id="tiplight3"></div></div>
+            <div  class="rinput" style="position: relative">
+                <input id="yanzhengma" type="number" name="phoneidentity" autocomplete="off" placeholder="请输入验证码" >
+                <button id="getpi" disabled="true">点击获取</button>
+            </div>
+            <div class="rinput"><input id="agree" name="agree" type="checkbox" required="required" value="1">
+                <label for="agree" style="position: relative; left: 10px; font-size: 13px; top: 11px; color: #6b6b6b;">我已同意《航大云课用户使用协议》</label></div>
+
+            <button id="register-submit" disabled="true" style="margin-top: 23px;">注册</button>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block footer %}
+{% endblock %}
+{% block page_js %}
+    <script>
+        $("#tab-register").on("click",function () {
+            $("#tab-register").attr("class","tab-now");
+            $("#tab-login").attr("class","tab")
+            $("#login-form").css("display","none");
+            $("#register-form").css("display","block");
+        })
+        $("#tab-login").on("click",function () {
+            $("#tab-login").attr("class","tab-now");
+            $("#tab-register").attr("class","tab");
+            $("#register-form").css("display","none");
+            $("#login-form").css("display","block");
+        })
+    </script>
+    {{ encore_entry_script_tags('register') }}
+{% endblock %}

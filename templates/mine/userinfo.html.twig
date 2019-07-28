@@ -1,0 +1,104 @@
+{% extends 'mine/layout.html.twig' %}
+{% block title %}个人信息 - 航大云课{% endblock %}
+{% block stylesheets %}
+    {{ encore_entry_link_tags('back') }}
+    <style>
+        #list3,#list2,#list4,#list5{
+            color: #6f6f6f;
+            font-size: 21px;
+        }
+        #list1{
+            color: #0c0c0c;
+            font-size: 21px;
+        }
+        #user_Avatar{
+            display: block;
+            margin: auto;
+            width: 85px;
+            border-radius: 50%;
+            box-shadow: 0 0 16px 0px #1011113d;
+        }
+        #userinfo-content{
+            clear:both;
+        }
+        .infodata{
+            margin: auto;
+            padding: 13px 0;
+            clear: both;
+            height: 35px;
+            width: 322px;
+        }
+        .infolabel{
+            height: 35px;
+            line-height: 33px;
+            font-size: 19px;
+            display: block;
+            width: 66px;
+            color: #585858;
+            float: left;
+        }
+        .infoinput{
+            height: 35px;
+            display: block;
+            border: solid 2px #ececec;
+            font-size: 18px;
+            padding-left: 6px;
+            color: #666666;
+            border-radius: 8px;
+            float: left;
+        }
+        #infosubmit{
+            height: 35px;
+            width: 92px;
+            display: block;
+            border: solid 0px #ececec;
+            font-size: 17px;
+            padding-left: 6px;
+            background-color: #03A9F4;
+            color: #ffffff;
+            border-radius: 8px;
+            position: relative;
+            left: 112px;
+            top: 18px;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div id="added_title">
+        <h1>修改个人信息</h1>
+
+    </div>
+
+    <div id="userinfo-content" style="margin-bottom: 100px;">
+        <div style="margin-bottom: 40px;"><a href="#"><img id="user_Avatar" src="/img/avatar-2.png"></a></div>
+        <div class="infodata">
+            <label class="infolabel">用户名</label>
+            <input class="infoinput" value="{{ app.user.username }}">
+        </div>
+        <div class="infodata">
+            <label class="infolabel">密码</label>
+            <input class="infoinput"  disabled="disabled" value="********">
+        </div>
+        <div class="infodata">
+            <label class="infolabel">身 份</label>
+            <input class="infoinput" disabled="disabled" value="老师">
+        </div>
+        <div class="infodata">
+            <label class="infolabel">学院</label>
+            <input class="infoinput" disabled="disabled" value="计算机科学与技术学院">
+        </div>
+        <div class="infodata">
+            <label class="infolabel">邮箱</label>
+            <input class="infoinput" disabled="disabled" value="{{ app.user.profile.email }}">
+        </div>
+        <div class="infodata">
+            <label class="infolabel">手机号</label>
+            <input class="infoinput" disabled="disabled" value="{{ app.user.profile.mobile }}">
+        </div>
+        <div class="infodata">
+            <a href=""><button id="infosubmit">保存修改</button></a>
+        </div>
+    </div>
+
+{% endblock%}

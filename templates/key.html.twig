@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+{% block title %}输入提取码 - 航大云课 {% endblock %}
+
+{% block body %}
+
+{% endblock %}
+{% block page_js %}
+    <script>
+        var isShare={{ isShare }};
+
+        var encode_string="{{ encode_string }}";
+
+        if(isShare==1){
+
+            modalFrame("请输入文件提取码","small",formInput("shareKey","提取码","请输入提取码","")+
+                formButton("确定","submitShareKey()"));
+        }
+        function submitShareKey() {
+            var key=$("#shareKey").val();
+            $.ajax({                                 //AJAX
+                type:"post",
+                url:'{{ path('shareLinkSubmit',{'encode_string':'encode_string'})}}'.replace('encode_string',encode_string),                      //请求URL,对应后台Controller中的路由
+                data:{key:key},
+                success:function(downloadurl){
+
+                    window.location.href='{{ path('fileGet',{'encode_string':'encode_string'})}}'.replace('encode_string',downloadurl.url);
+                },
+
+                error:function(data){
+                    alert("服务器添加失败");
+                },
+                dataType:"json"
+            })
+        }
+
+    </script>
+{% endblock %}

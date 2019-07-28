@@ -1,0 +1,123 @@
+{% extends 'mine/layout.html.twig' %}
+{% block title %}已添加课程 - 航大云课{% endblock %}
+{% block stylesheets %}
+    <link href="{{ asset('css/webuploader.css') }}" />
+    {{ encore_entry_link_tags('add-course') }}
+    {{ encore_entry_link_tags('back') }}
+    <style>
+        #list1,#list3,#list4,#list5{
+            color: #6f6f6f;
+            font-size: 21px;
+        }
+        #list2{
+            color: #0c0c0c;
+            font-size: 21px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div id="added_title">
+        <h1>已添加课程</h1>
+        <a id="toaddcourse" onclick="addCourse()" >添加课程</a>
+    </div>
+    <div id="wrapper" style="display:none;height: 230px;">
+        <div id="container">
+            <!--头部，相册选择和格式选择-->
+
+            <div id="uploader" style="height: 270px;">
+                <div class="queueList" style="height: 317px;overflow: auto;margin: 20px;">
+                    <div id="dndArea" class="placeholder" style="position: absolute;width: 600px;">
+                        <div id="filePicker"></div>
+                        <p>或将文件拖到这里，单次最多可选300个</p>
+                    </div>
+                </div>
+                <div class="statusBar" style="display:none;">
+                    <div class="progress" >
+                        <span class="text">0%</span>
+                        <span class="percentage"></span>
+                    </div><div class="info"></div>
+                    <div class="btns">
+                        <div id="filePicker2"></div><div class="uploadBtn">开始上传</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for course in courseList %}
+
+    <div id="added_course_list">
+        <div class="added_course">
+            <a href="{{ path('oneCourseInfo',{'id':course.id}) }}">
+                <img class="added_course_img" src="{{  asset(course.getCoverImg().getPath() )}}">
+            <h2 class="added_course_name">{{ course.name }}</h2>
+
+            <h3 class="added_course_teacher">{{ course.cate }} / {{ course.teacher.username }}</h3>
+            <p class="added_course_intro">{{ course.info }}</p></a>
+            <a onclick='editCourse({{ course.id }},"{{ course.name }}","{{ course.info }}","{{ course.courseHour }}","{{ course.capacity }}","{{ course.cate }}")'><img class="added_course_edit" src="{{asset('img/edit.png')}}"></a>
+        </div>
+
+    </div>
+    {% endfor %}
+
+{% endblock%}
+{% block page_js %}
+<script>
+    //添加课程
+
+    function addCourse() {
+        $.ajax({                                 //AJAX
+            type:"get",
+            url:"{{ path('categoryGet') }}",                      //请求URL,对应后台Controller中的路由
+
+            success:function(data){                    //后台返回响应结果时会自动执行该回调函数
+                //data.id,data.courseName,data.courseInfo,data.courseNum,data.courseTime,data.courseCate
+
+                if(data.length==0) {messageAlert("当前没有课程分类,请联系管理员添加");return 0;}
+                modalFrame("添加课程","630px",
+                    formInput("courseName","课程名称","请输入课程名","")+
+                    formTextArea("courseInfo","简介","请输入课程简介","")+
+                    formNumber("courseTime","时长(课时)","请输入课程时长","")+
+                    formNumber("courseNum","容量(人)","请输入人数","")+
+                    formSelect("courseCate","分类",data,data[0].name)+
+                    formImgUploader("选择封面","","chooseCover()")+
+                    formButton("立即添加","submitAdd()")
+                )
+
+            },
+            error:function(data){
+                alert("服务器添加失败")
+            },
+            dataType:"json"
+        })
+
+
+    }
+    function submitAdd() {
+        $(".uploadBtn").trigger("click");
+
+
+    }
+    function submitAdd_old(id){
+        let courseName=$("#courseName").val();
+        let courseTime=$("#courseTime").val();
+        let courseInfo=$("#courseInfo").val();
+        let courseNum=$("#courseNum").val();
+        let courseCate=$("#courseCate").find("option:selected").text();
+        let courseId=id;
+        $.ajax({                                 //AJAX
+            type:"post",
+            url:"{{ path('courseEditUpdate',{'id':"999"}) }}".replace("999",id),                      //请求URL,对应后台Controller中的路由
+            data:{"name":courseName,"courseHours":courseTime,"info":courseInfo,"category":courseCate,"num":courseNum},//往后台提交的数据项
+            success:function(data){
+                if(data.status==200)
+
+                    window.location.reload();
+            },
+            dataType:"json"
+        })
+    }
+
+</script>
+    <script type="text/javascript" src="{{ asset('js/webuploader.js') }}"></script>
+    {{ encore_entry_script_tags('add-course') }}
+{% endblock%}
